@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  planName  String   @default("free") @map("plan_name")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  usageLogs         UsageLog[]
+  interviewSessions InterviewSession[]
+
+  @@map("users")
+}
+
+model UsageLog {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  featureName String   @map("feature_name")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("usage_logs")
+}
+
+model InterviewSession {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  topic     String
+  level     String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("interview_sessions")
+}
